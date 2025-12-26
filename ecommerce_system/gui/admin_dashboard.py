@@ -209,9 +209,49 @@ class AdminDashboard:
         self.prod_category_combo = ctk.CTkComboBox(form_frame, values=category_names, variable=self.prod_category_var)
         self.prod_category_combo.grid(row=4, column=1, padx=5, pady=5)
         
+        # Image selection
+        ctk.CTkLabel(form_frame, text="Image:").grid(row=5, column=0, padx=5, pady=5, sticky="w")
+        image_frame = ctk.CTkFrame(form_frame)
+        image_frame.grid(row=5, column=1, padx=5, pady=5, sticky="ew")
+        
+        self.prod_image_path_label = ctk.CTkLabel(image_frame, text="No image selected")
+        self.prod_image_path_label.pack(side="left", padx=5)
+        
+        def select_product_image():
+            from tkinter import filedialog
+            file_path = filedialog.askopenfilename(
+                title="Select Product Image",
+                filetypes=[("Image files", "*.jpg *.jpeg *.png *.gif *.bmp")]
+            )
+            if file_path:
+                # Copy image to assets/images directory
+                import os
+                import shutil
+                
+                # Create assets/images directory if it doesn't exist
+                os.makedirs("assets/images", exist_ok=True)
+                
+                # Extract filename and copy to assets/images
+                filename = os.path.basename(file_path)
+                dest_path = f"assets/images/{filename}"
+                
+                # If file with same name exists, add a number to make it unique
+                counter = 1
+                original_dest_path = dest_path
+                while os.path.exists(dest_path):
+                    name, ext = os.path.splitext(original_dest_path)
+                    dest_path = f"{name}_{counter}{ext}"
+                    counter += 1
+                
+                shutil.copy2(file_path, dest_path)
+                self.prod_image_path_label.configure(text=dest_path)
+        
+        select_image_btn = ctk.CTkButton(image_frame, text="Browse", command=select_product_image)
+        select_image_btn.pack(side="right", padx=5)
+
         # Add product button
         add_prod_btn = ctk.CTkButton(form_frame, text="Add Product", command=self.add_product)
-        add_prod_btn.grid(row=5, column=0, columnspan=2, pady=10)
+        add_prod_btn.grid(row=6, column=0, columnspan=2, pady=10)
         
         # Products list
         products_frame = ctk.CTkFrame(self.content_frame)
@@ -227,6 +267,9 @@ class AdminDashboard:
         
         delete_prod_btn = ctk.CTkButton(buttons_frame, text="Delete Product", command=self.delete_product)
         delete_prod_btn.pack(side="left", padx=5)
+        
+        update_prod_btn = ctk.CTkButton(buttons_frame, text="Update Product", command=self.update_product)
+        update_prod_btn.pack(side="left", padx=5)
         
         # Load products
         self.load_products()
@@ -262,9 +305,14 @@ class AdminDashboard:
                 category_id = cat[0]
                 break
         
+        # Get image path
+        image_path = self.prod_image_path_label.cget("text")
+        if image_path == "No image selected":
+            image_path = None
+
         from models.product import Product
         new_product = Product(name=name, description=description, price=price, 
-                              stock=stock, category_id=category_id)
+                              stock=stock, category_id=category_id, image=image_path)
         
         if self.product_dao.create_product(new_product):
             messagebox.showinfo("Success", "Product added successfully!")
@@ -272,6 +320,7 @@ class AdminDashboard:
             self.prod_desc_entry.delete(0, tk.END)
             self.prod_price_entry.delete(0, tk.END)
             self.prod_stock_entry.delete(0, tk.END)
+            self.prod_image_path_label.configure(text="No image selected")
             self.load_products()
         else:
             messagebox.showerror("Error", "Failed to add product")
@@ -292,6 +341,151 @@ class AdminDashboard:
                 self.load_products()
             else:
                 messagebox.showerror("Error", "Failed to delete product")
+
+    def update_product(self):
+        """Update selected product details including image"""
+        selection = self.products_listbox.curselection()
+        if not selection:
+            messagebox.showerror("Error", "Please select a product to update")
+            return
+
+        prod_info = self.products_listbox.get(selection[0])
+        prod_id = int(prod_info.split(":")[0])
+        
+        # Get the current product details
+        product = self.product_dao.get_product_by_id(prod_id)
+        if not product:
+            messagebox.showerror("Error", "Product not found")
+            return
+
+        # Create a new window for updating product
+        update_window = ctk.CTkToplevel(self.parent)
+        update_window.title("Update Product")
+        update_window.geometry("400x600")
+        
+        # Product details form
+        form_frame = ctk.CTkFrame(update_window)
+        form_frame.pack(pady=20, padx=20, fill="both", expand=True)
+        
+        # Product details
+        ctk.CTkLabel(form_frame, text="Name:").grid(row=0, column=0, padx=5, pady=5, sticky="w")
+        name_entry = ctk.CTkEntry(form_frame, placeholder_text="Product Name")
+        name_entry.grid(row=0, column=1, padx=5, pady=5)
+        name_entry.insert(0, product.name)
+        
+        ctk.CTkLabel(form_frame, text="Description:").grid(row=1, column=0, padx=5, pady=5, sticky="w")
+        desc_entry = ctk.CTkEntry(form_frame, placeholder_text="Description")
+        desc_entry.grid(row=1, column=1, padx=5, pady=5)
+        desc_entry.insert(0, product.description or "")
+        
+        ctk.CTkLabel(form_frame, text="Price:").grid(row=2, column=0, padx=5, pady=5, sticky="w")
+        price_entry = ctk.CTkEntry(form_frame, placeholder_text="Price")
+        price_entry.grid(row=2, column=1, padx=5, pady=5)
+        price_entry.insert(0, str(product.price))
+        
+        ctk.CTkLabel(form_frame, text="Stock:").grid(row=3, column=0, padx=5, pady=5, sticky="w")
+        stock_entry = ctk.CTkEntry(form_frame, placeholder_text="Stock Quantity")
+        stock_entry.grid(row=3, column=1, padx=5, pady=5)
+        stock_entry.insert(0, str(product.stock))
+        
+        # Category selection
+        ctk.CTkLabel(form_frame, text="Category:").grid(row=4, column=0, padx=5, pady=5, sticky="w")
+        categories = self.category_dao.get_all_categories()
+        category_names = [cat[1] for cat in categories]  # Get category names
+        category_var = ctk.StringVar()
+        
+        # Set current category as default
+        current_category_name = ""
+        for cat in categories:
+            if cat[0] == product.category_id:
+                current_category_name = cat[1]
+                break
+        category_var.set(current_category_name)
+        
+        category_combo = ctk.CTkComboBox(form_frame, values=category_names, variable=category_var)
+        category_combo.grid(row=4, column=1, padx=5, pady=5)
+        
+        # Image selection
+        ctk.CTkLabel(form_frame, text="Image:").grid(row=5, column=0, padx=5, pady=5, sticky="w")
+        image_frame = ctk.CTkFrame(form_frame)
+        image_frame.grid(row=5, column=1, padx=5, pady=5, sticky="ew")
+        
+        image_path_label = ctk.CTkLabel(image_frame, text=product.image or "No image selected")
+        image_path_label.pack(side="left", padx=5)
+        
+        def select_image():
+            from tkinter import filedialog
+            file_path = filedialog.askopenfilename(
+                title="Select Product Image",
+                filetypes=[("Image files", "*.jpg *.jpeg *.png *.gif *.bmp")]
+            )
+            if file_path:
+                # Copy image to assets/images directory
+                import os
+                import shutil
+                from pathlib import Path
+                
+                # Create assets/images directory if it doesn't exist
+                os.makedirs("assets/images", exist_ok=True)
+                
+                # Extract filename and copy to assets/images
+                filename = os.path.basename(file_path)
+                dest_path = f"assets/images/{filename}"
+                
+                # If file with same name exists, add a number to make it unique
+                counter = 1
+                original_dest_path = dest_path
+                while os.path.exists(dest_path):
+                    name, ext = os.path.splitext(original_dest_path)
+                    dest_path = f"{name}_{counter}{ext}"
+                    counter += 1
+                
+                shutil.copy2(file_path, dest_path)
+                image_path_label.configure(text=dest_path)
+        
+        select_image_btn = ctk.CTkButton(image_frame, text="Browse", command=select_image)
+        select_image_btn.pack(side="right", padx=5)
+        
+        def save_updated_product():
+            name = name_entry.get().strip()
+            description = desc_entry.get().strip()
+            try:
+                price = float(price_entry.get().strip())
+                stock = int(stock_entry.get().strip())
+            except ValueError:
+                messagebox.showerror("Error", "Price and stock must be valid numbers")
+                return
+
+            if not name:
+                messagebox.showerror("Error", "Product name is required")
+                return
+
+            # Get category ID
+            category_name = category_var.get()
+            category_id = None
+            for cat in categories:
+                if cat[1] == category_name:
+                    category_id = cat[0]
+                    break
+
+            # Update product object
+            product.name = name
+            product.description = description
+            product.price = price
+            product.stock = stock
+            product.category_id = category_id
+            product.image = image_path_label.cget("text") if image_path_label.cget("text") != "No image selected" else None
+
+            if self.product_dao.update_product(product):
+                messagebox.showinfo("Success", "Product updated successfully!")
+                update_window.destroy()
+                self.load_products()
+            else:
+                messagebox.showerror("Error", "Failed to update product")
+
+        # Save button
+        save_btn = ctk.CTkButton(form_frame, text="Update Product", command=save_updated_product)
+        save_btn.grid(row=6, column=0, columnspan=2, pady=20)
 
     def show_categories(self):
         """Show the category management view"""
