@@ -136,6 +136,27 @@ class CustomerDashboard:
             product_frame = ctk.CTkFrame(row_frame)
             product_frame.pack(side="left", padx=5, pady=5, fill="x", expand=True)
             
+            # Product image if available
+            if product.image and product.image != "No image selected":
+                try:
+                    from PIL import Image, ImageTk
+                    # Load and resize image
+                    img = Image.open(product.image)
+                    img = img.resize((100, 100), Image.Resampling.LANCZOS)
+                    photo = ImageTk.PhotoImage(img)
+                    
+                    # Store reference to prevent garbage collection
+                    img_label = ctk.CTkLabel(product_frame, image=photo, text="")
+                    img_label.image = photo  # Keep a reference
+                    img_label.pack(pady=5)
+                except Exception:
+                    # If image loading fails, show a placeholder
+                    img_label = ctk.CTkLabel(product_frame, text="No Image", height=100)
+                    img_label.pack(pady=5)
+            else:
+                img_label = ctk.CTkLabel(product_frame, text="No Image", height=100)
+                img_label.pack(pady=5)
+            
             # Product details
             name_label = ctk.CTkLabel(product_frame, text=product.name, 
                                       font=ctk.CTkFont(size=14, weight="bold"))
