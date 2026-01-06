@@ -1,5 +1,5 @@
-from db.db_connection import db
-from models.order import Order, OrderItem
+from ..db.db_connection import db
+from ..models.order import Order, OrderItem
 from datetime import datetime
 
 

@@ -1,11 +1,11 @@
 import tkinter as tk
 from tkinter import messagebox
 import customtkinter as ctk
-from dao.user_dao import UserDAO
-from dao.product_dao import ProductDAO
-from dao.category_dao import CategoryDAO
-from dao.order_dao import OrderDAO
-from gui.analytics import AnalyticsDashboard
+from ..dao.user_dao import UserDAO
+from ..dao.product_dao import ProductDAO
+from ..dao.category_dao import CategoryDAO
+from ..dao.order_dao import OrderDAO
+from .analytics import AnalyticsDashboard
 
 
 class AdminDashboard:
@@ -137,7 +137,7 @@ class AdminDashboard:
             messagebox.showerror("Error", "User with this email already exists")
             return
         
-        from models.user import User
+        from ..models.user import User
         new_user = User(name=name, email=email, password=password, role=role)
         
         if self.user_dao.create_user(new_user):
@@ -310,7 +310,7 @@ class AdminDashboard:
         if image_path == "No image selected":
             image_path = None
 
-        from models.product import Product
+        from ..models.product import Product
         new_product = Product(name=name, description=description, price=price, 
                               stock=stock, category_id=category_id, image=image_path)
         

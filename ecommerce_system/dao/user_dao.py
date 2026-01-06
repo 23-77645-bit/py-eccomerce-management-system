@@ -1,6 +1,6 @@
-from db.db_connection import db
-from models.user import User
-from utils.security import hash_password, verify_password
+from ..db.db_connection import db
+from ..models.user import User
+from ..utils.security import hash_password, verify_password
 
 
 class UserDAO:

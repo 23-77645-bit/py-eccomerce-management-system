@@ -1,9 +1,9 @@
 import tkinter as tk
 from tkinter import messagebox
 import customtkinter as ctk
-from dao.user_dao import UserDAO
-from gui.admin_dashboard import AdminDashboard
-from gui.customer_dashboard import CustomerDashboard
+from ..dao.user_dao import UserDAO
+from .admin_dashboard import AdminDashboard
+from .customer_dashboard import CustomerDashboard
 
 
 class LoginWindow:
@@ -120,7 +120,7 @@ class LoginWindow:
             return
         
         # Create new user
-        from models.user import User
+        from ..models.user import User
         new_user = User(name=name, email=email, password=password, role='customer')
         
         if self.user_dao.create_user(new_user):

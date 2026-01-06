@@ -1,8 +1,8 @@
 import tkinter as tk
 from tkinter import messagebox
 import customtkinter as ctk
-from dao.order_dao import OrderDAO
-from dao.product_dao import ProductDAO
+from ..dao.order_dao import OrderDAO
+from ..dao.product_dao import ProductDAO
 
 
 class CartWindow:

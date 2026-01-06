@@ -1,4 +1,4 @@
-from db.db_connection import db
+from ..db.db_connection import db
 
 
 class CategoryDAO:
