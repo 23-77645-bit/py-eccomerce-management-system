@@ -4,7 +4,7 @@ import os
 DB_CONFIG = {
     'host': 'localhost',
     'user': 'root',
-    'password': 'password',  # Change this to your MySQL password
+    'password': 'password',  # Password for MySQL root user
     'database': 'ecommerce_db',
     'charset': 'utf8mb4'
 }

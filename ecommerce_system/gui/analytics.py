@@ -3,8 +3,8 @@ from tkinter import messagebox
 import customtkinter as ctk
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from dao.order_dao import OrderDAO
-from dao.product_dao import ProductDAO
+from ..dao.order_dao import OrderDAO
+from ..dao.product_dao import ProductDAO
 
 
 class AnalyticsDashboard:
@@ -169,6 +169,6 @@ class AnalyticsDashboard:
     def go_back(self):
         """Go back to admin dashboard"""
         # Import here to avoid circular imports
-        from gui.admin_dashboard import AdminDashboard
+        from .admin_dashboard import AdminDashboard
         self.main_frame.destroy()
         AdminDashboard(self.parent, self.user)

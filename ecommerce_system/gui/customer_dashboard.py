@@ -1,11 +1,11 @@
 import tkinter as tk
 from tkinter import messagebox, simpledialog
 import customtkinter as ctk
-from dao.user_dao import UserDAO
-from dao.product_dao import ProductDAO
-from dao.category_dao import CategoryDAO
-from dao.order_dao import OrderDAO
-from gui.cart import CartWindow
+from ..dao.user_dao import UserDAO
+from ..dao.product_dao import ProductDAO
+from ..dao.category_dao import CategoryDAO
+from ..dao.order_dao import OrderDAO
+from .cart import CartWindow
 
 
 class CustomerDashboard:

@@ -1,5 +1,5 @@
-from db.db_connection import db
-from models.product import Product
+from ..db.db_connection import db
+from ..models.product import Product
 
 
 class ProductDAO:
